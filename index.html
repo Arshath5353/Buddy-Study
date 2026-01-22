@@ -1,79 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Room</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buddy Study</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <div class="app-container">
-        
-        <div id="login-screen" class="screen fade-in">
-            <div class="card">
-                <h1>📚 Study Room</h1>
-                <p>Focus, Chat, and Achieve Together.</p>
-                <button id="btn-login" class="btn-primary">
-                    Login with Google
-                </button>
+      
+      <div id="login-screen" class="card fade-in">
+        <img src="logo.jpeg" alt="Buddy Study Logo" class="login-logo" />
+
+        <h1>Buddy Study</h1>
+        <p>Focus, Chat, and Achieve Together.</p>
+
+        <button id="btn-login" class="btn-primary">
+          <span style="margin-right: 8px">🚀 </span> Login with Google
+        </button>
+      </div>
+
+      <div id="dashboard-screen" class="screen hidden fade-in">
+        <div class="card">
+          <img src="logo.jpeg" alt="Logo" class="login-logo">
+          
+          <h2>Welcome Back Buddy!</h2>
+          
+          <div class="action-buttons">
+            <button id="btn-create-room" class="btn-primary">
+              Create New Room
+            </button>
+
+            <div class="divider"><span>OR</span></div>
+
+            <div class="join-box">
+              <input
+                type="text"
+                id="input-room-code"
+                placeholder="Enter Room Code (e.g., A7X2)"
+              />
+              <button id="btn-join-room" class="btn-secondary">Join</button>
             </div>
-        </div>
 
-        <div id="dashboard-screen" class="screen hidden fade-in">
-            <div class="card">
-                <h2>👋 Welcome Back!</h2>
-                <div class="action-buttons">
-                    <button id="btn-create-room" class="btn-primary">Create New Room</button>
-                    
-                    <div class="divider"><span>OR</span></div>
-                    
-                    <div class="join-box">
-                        <input type="text" id="input-room-code" placeholder="Enter Room Code (e.g., A7X2)">
-                        <button id="btn-join-room" class="btn-secondary">Join</button>
-                    </div>
-
-                    <div id="history-section" class="hidden" style="margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px;">
-                        <h4 style="color: #666; margin-bottom: 10px; font-size: 0.9rem;">Recent Rooms:</h4>
-                        <ul id="room-history-list" class="history-list">
-                            </ul>
-                    </div>
-                </div>
+            <div id="history-section" class="hidden" style="margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px;">
+              <h4 style="color: #666; margin: 0 0 10px 0; font-size: 0.9rem;">
+                Recent Rooms:
+              </h4>
+              <ul id="room-history-list" class="history-list"></ul>
             </div>
+          </div>
         </div>
+      </div>
 
-        <div id="room-screen" class="screen hidden fade-in">
-            <header class="room-header">
-                <h2 id="room-title">Room: ...</h2>
-                <button id="btn-leave" class="btn-danger">Leave</button>
-            </header>
-            
-            <div class="room-layout">
-                <div class="panel todo-panel">
-                    <h3>✅ Shared Tasks</h3>
-                    <div class="input-group">
-                        <input type="text" id="input-task" placeholder="Add a new task...">
-                        <button id="btn-add-task" class="btn-icon">+</button>
-                    </div>
-                    <ul id="todo-list">
-                        </ul>
-                </div>
+      <div id="room-screen" class="screen hidden fade-in">
+        <header class="room-header">
+          <div style="display:flex; align-items:center; gap:10px;">
+             <img src="logo.jpeg" alt="Logo" style="width:30px; border-radius:6px;">
+             <h2 id="room-title">Room: ...</h2>
+          </div>
+          <button id="btn-leave" class="btn-danger">Leave</button>
+        </header>
 
-                <div class="panel chat-panel">
-                    <h3>💬 Chat</h3>
-                    <div id="chat-box">
-                        </div>
-                    <div class="input-group">
-                        <input type="text" id="input-msg" placeholder="Type a message...">
-                        <button id="btn-send-msg" class="btn-icon">➤</button>
-                    </div>
-                </div>
+        <div class="room-layout">
+          <div class="panel todo-panel">
+            <h3>✅ Shared Tasks</h3>
+            <div class="input-group">
+              <input
+                type="text"
+                id="input-task"
+                placeholder="Add a new task..."
+              />
+              <button id="btn-add-task" class="btn-icon">+</button>
             </div>
+            <ul id="todo-list"></ul>
+          </div>
+
+          <div class="panel chat-panel">
+            <h3>Chat</h3>
+            <div id="chat-box"></div>
+            <div class="input-group">
+              <input
+                type="text"
+                id="input-msg"
+                placeholder="Type a message..."
+              />
+              <button id="btn-send-msg" class="btn-icon">➤</button>
+            </div>
+          </div>
         </div>
+      </div>
 
     </div>
 
     <script type="module" src="app.js"></script>
-</body>
+  </body>
 </html>

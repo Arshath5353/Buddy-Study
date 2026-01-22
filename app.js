@@ -41,6 +41,9 @@ const auth = getAuth(app);
 const db = getDatabase(app); 
 const provider = new GoogleAuthProvider();
 
+// Sound Effect
+const notificationSound = new Audio("https://www.soundjay.com/buttons/sounds/button-30.mp3");
+
 let currentUser = null;
 let currentRoom = null;
 
@@ -58,7 +61,6 @@ onAuthStateChanged(auth, (user) => {
         currentUser = user;
         document.getElementById("login-screen").classList.add("hidden");
         document.getElementById("dashboard-screen").classList.remove("hidden");
-        // SHOW HISTORY WHEN LOGGED IN
         renderRoomHistory();
     } else {
         currentUser = null;
@@ -69,14 +71,13 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================
-// 5. HISTORY HELPER FUNCTIONS (LOCAL STORAGE)
+// 5. HISTORY HELPER FUNCTIONS
 // ==========================================
 function saveRoomToHistory(roomCode) {
     let history = JSON.parse(localStorage.getItem('studyRoomHistory')) || [];
-    // Avoid duplicates
     if (!history.includes(roomCode)) {
-        history.unshift(roomCode); // Add to top
-        if (history.length > 5) history.pop(); // Keep only last 5
+        history.unshift(roomCode);
+        if (history.length > 5) history.pop();
         localStorage.setItem('studyRoomHistory', JSON.stringify(history));
     }
 }
@@ -90,23 +91,14 @@ function renderRoomHistory() {
 
     if (history.length > 0) {
         historySection.classList.remove("hidden");
-        
         history.forEach(code => {
             const li = document.createElement("li");
-            li.innerHTML = `
-                <span>🚪 ${code}</span>
-                <button class="btn-forget" title="Forget Room">🗑️</button>
-            `;
-
-            // Click Name -> Check & Join
+            li.innerHTML = `<span>🚪 ${code}</span><button class="btn-forget">🗑️</button>`;
             li.querySelector("span").onclick = () => checkAndJoin(code);
-
-            // Click Trash -> Remove
             li.querySelector(".btn-forget").onclick = (e) => {
                 e.stopPropagation(); 
                 removeRoomFromHistory(code);
             };
-
             list.appendChild(li);
         });
     } else {
@@ -124,7 +116,6 @@ function removeRoomFromHistory(roomCode) {
 // ==========================================
 // 6. CREATE & JOIN ROOMS
 // ==========================================
-
 function checkAndJoin(roomCode) {
     const roomRef = ref(db, 'rooms/' + roomCode);
     get(roomRef).then((snapshot) => {
@@ -139,32 +130,25 @@ function checkAndJoin(roomCode) {
 
 document.getElementById("btn-create-room").addEventListener("click", () => {
     const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-    
     set(ref(db, 'rooms/' + roomCode), {
         owner: currentUser.uid,
         createdAt: Date.now()
-    }).then(() => {
-        enterRoom(roomCode);
-    });
+    }).then(() => enterRoom(roomCode));
 });
 
 document.getElementById("btn-join-room").addEventListener("click", () => {
     const roomCode = document.getElementById("input-room-code").value.toUpperCase().trim();
-    if (!roomCode) return alert("Please enter a code!");
-    checkAndJoin(roomCode);
+    if (roomCode) checkAndJoin(roomCode);
+    else alert("Please enter a code!");
 });
 
-document.getElementById("btn-leave").addEventListener("click", () => {
-    location.reload(); 
-});
+document.getElementById("btn-leave").addEventListener("click", () => location.reload());
 
 // ==========================================
-// 7. CHAT & TASKS
+// 7. CHAT & TASKS (CORE LOGIC)
 // ==========================================
 function enterRoom(roomCode) {
     currentRoom = roomCode;
-    
-    // Save to History
     saveRoomToHistory(roomCode);
 
     document.getElementById("dashboard-screen").classList.add("hidden");
@@ -173,25 +157,7 @@ function enterRoom(roomCode) {
 
     const chatRef = ref(db, `rooms/${roomCode}/messages`);
 
-    // --- AUTO DELETE OLD MESSAGES (8 Hrs) ---
-    get(chatRef).then((snapshot) => {
-        if (snapshot.exists()) {
-            const messages = snapshot.val();
-            const now = Date.now();
-            const TIME_LIMIT = 8 * 60 * 60 * 1000; 
-
-            Object.keys(messages).forEach((msgId) => {
-                const msg = messages[msgId];
-                if (msg.timestamp && (now - msg.timestamp > TIME_LIMIT)) {
-                    remove(ref(db, `rooms/${roomCode}/messages/${msgId}`));
-                }
-            });
-        }
-    });
-
-    // --- CHAT FEATURE ---
-    
-    // 1. Send Message
+    // --- 1. SEND MESSAGE ---
     document.getElementById("btn-send-msg").onclick = () => {
         const input = document.getElementById("input-msg");
         if (input.value.trim() === "") return;
@@ -204,7 +170,7 @@ function enterRoom(roomCode) {
         input.value = "";
     };
 
-    // 2. Display Messages
+    // --- 2. RECEIVE MESSAGES ---
     const chatBox = document.getElementById("chat-box");
     onValue(chatRef, (snapshot) => {
         chatBox.innerHTML = "";
@@ -214,6 +180,17 @@ function enterRoom(roomCode) {
             Object.entries(data).forEach(([key, msg]) => {
                 const isMyMsg = msg.user === currentUser.displayName;
                 
+                // Format Time
+                const timeVal = msg.timestamp ? new Date(msg.timestamp) : new Date();
+                const timeString = timeVal.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // Play Sound logic (only if not me & recent)
+                const isRecent = (Date.now() - msg.timestamp) < 2000;
+                if (!isMyMsg && isRecent) {
+                    notificationSound.play().catch(e => console.log("Sound blocked"));
+                }
+
+                // Delete Button
                 const deleteBtn = isMyMsg 
                     ? `<span class="delete-msg" data-key="${key}" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">(x)</span>` 
                     : '';
@@ -221,13 +198,14 @@ function enterRoom(roomCode) {
                 chatBox.innerHTML += `
                     <div class="message ${isMyMsg ? 'my-msg' : 'other-msg'}">
                         <strong>${msg.user.split(" ")[0]}:</strong> ${msg.text} ${deleteBtn}
+                        <span class="msg-time">${timeString}</span>
                     </div>`;
             });
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     });
 
-    // 3. Chat Click (Delete)
+    // --- 3. DELETE MESSAGE ---
     chatBox.addEventListener("click", (e) => {
         if (e.target.classList.contains("delete-msg")) {
             const msgId = e.target.getAttribute("data-key");
@@ -237,27 +215,20 @@ function enterRoom(roomCode) {
         }
     });
 
-    // --- TASK FEATURE ---
+    // --- TASKS FEATURE ---
     const taskRef = ref(db, `rooms/${roomCode}/tasks`);
 
-    // 1. Add Task
     document.getElementById("btn-add-task").onclick = () => {
         const input = document.getElementById("input-task");
         if (input.value.trim() === "") return;
-
-        push(taskRef, {
-            text: input.value,
-            completed: false 
-        });
+        push(taskRef, { text: input.value, completed: false });
         input.value = "";
     };
 
-    // 2. Display Tasks
     const taskList = document.getElementById("todo-list");
     onValue(taskRef, (snapshot) => {
         taskList.innerHTML = "";
         const data = snapshot.val();
-        
         if (data) {
             Object.entries(data).forEach(([key, task]) => {
                 const textStyle = task.completed ? 'text-decoration: line-through; color: gray;' : '';
@@ -275,17 +246,12 @@ function enterRoom(roomCode) {
         }
     });
 
-    // 3. Task Click (Toggle/Delete)
     taskList.addEventListener("click", (e) => {
         const key = e.target.getAttribute("data-key");
         if (!key) return;
-
         if (e.target.classList.contains("toggle-task")) {
-            update(ref(db, `rooms/${roomCode}/tasks/${key}`), {
-                completed: e.target.checked
-            });
+            update(ref(db, `rooms/${roomCode}/tasks/${key}`), { completed: e.target.checked });
         }
-
         if (e.target.classList.contains("delete-task")) {
             remove(ref(db, `rooms/${roomCode}/tasks/${key}`));
         }
