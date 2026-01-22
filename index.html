@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,10 +9,12 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/jpeg" href="/favicons.jpeg">
   </head>
   <body>
+    
+
     <div class="app-container">
-      
       <div id="login-screen" class="card fade-in">
         <img src="logo.jpeg" alt="Buddy Study Logo" class="login-logo" />
 
@@ -26,10 +28,10 @@
 
       <div id="dashboard-screen" class="screen hidden fade-in">
         <div class="card">
-          <img src="logo.jpeg" alt="Logo" class="login-logo">
-          
+          <img src="logo.jpeg" alt="Logo" class="login-logo" />
+
           <h2>Welcome Back Buddy!</h2>
-          
+
           <div class="action-buttons">
             <button id="btn-create-room" class="btn-primary">
               Create New Room
@@ -46,8 +48,17 @@
               <button id="btn-join-room" class="btn-secondary">Join</button>
             </div>
 
-            <div id="history-section" class="hidden" style="margin-top: 25px; text-align: left; border-top: 1px solid #eee; padding-top: 15px;">
-              <h4 style="color: #666; margin: 0 0 10px 0; font-size: 0.9rem;">
+            <div
+              id="history-section"
+              class="hidden"
+              style="
+                margin-top: 25px;
+                text-align: left;
+                border-top: 1px solid #eee;
+                padding-top: 15px;
+              "
+            >
+              <h4 style="color: #666; margin: 0 0 10px 0; font-size: 0.9rem">
                 Recent Rooms:
               </h4>
               <ul id="room-history-list" class="history-list"></ul>
@@ -58,9 +69,13 @@
 
       <div id="room-screen" class="screen hidden fade-in">
         <header class="room-header">
-          <div style="display:flex; align-items:center; gap:10px;">
-             <img src="logo.jpeg" alt="Logo" style="width:30px; border-radius:6px;">
-             <h2 id="room-title">Room: ...</h2>
+          <div style="display: flex; align-items: center; gap: 10px">
+            <img
+              src="logo.jpeg"
+              alt="Logo"
+              style="width: 30px; border-radius: 6px"
+            />
+            <h2 id="room-title">Room: ...</h2>
           </div>
           <button id="btn-leave" class="btn-danger">Leave</button>
         </header>
@@ -93,7 +108,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <script type="module" src="app.js"></script>
