@@ -1,6 +1,8 @@
 
 📚 Buddy Study
 
+Site Link - https://buddy-study-portal.netlify.app/
+
 > **Manage all your study groups in one place.**
 
 Buddy Study is a modern **virtual, real-time study space** built to help students collaborate remotely in a structured and distraction-free environment.
